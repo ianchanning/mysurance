@@ -12,11 +12,13 @@ badd +1 /var/www/vhosts/mysurance/quick-todo
 badd +2 package.json
 badd +5 src/firestore.js
 badd +1 src
-badd +11 src/App.js
-badd +14 src/App.css
+badd +21 src/App.js
+badd +22 src/App.css
+badd +2 /var/www/vhosts/mysurance/.gitignore
+badd +0 fugitive:///var/www/vhosts/mysurance/.git//0/quick-todo/src/App.js
 argglobal
 silent! argdel *
-edit src/App.js
+edit fugitive:///var/www/vhosts/mysurance/.git//0/quick-todo/src/App.js
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -32,12 +34,12 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 3 - ((2 * winheight(0) + 16) / 33)
+let s:l = 29 - ((28 * winheight(0) + 16) / 33)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
-normal! 017|
+29
+normal! 0
 lcd /var/www/vhosts/mysurance/quick-todo
 tabnext 1
 if exists('s:wipebuf')
