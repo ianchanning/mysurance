@@ -12,92 +12,92 @@ class App extends Component {
     constructor(props) {
         super(props)
         // Set the default state of our application
-        this.state = { addingTodo: false, pendingTodo: "", todos: [] }
+        this.state = { addingPolicy: false, pendingPolicy: "", policies: [] }
         // We want event handlers to share this context
-        this.addTodo = this.addTodo.bind(this)
-        this.completeTodo = this.completeTodo.bind(this)
-        // We listen for live changes to our todos collection in Firebase
-        firestore.collection("todos").onSnapshot(snapshot => {
-            let todos = []
+        this.addPolicy = this.addPolicy.bind(this)
+        this.deletePolicy = this.deletePolicy.bind(this)
+        // We listen for live changes to our policies collection in Firebase
+        firestore.collection("policies").onSnapshot(snapshot => {
+            let policies = []
             snapshot.forEach(doc => {
-                const todo = doc.data()
-                todo.id = doc.id
-                if (!todo.completed) todos.push(todo)
+                const policy = doc.data()
+                policy.id = doc.id
+                if (!policy.deleted) policies.push(policy)
             })
-            // Sort our todos based on time added
-            todos.sort(function(a, b) {
+            // Sort our policies based on time added
+            policies.sort(function(a, b) {
                 return (
                     new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
                 )
             })
             // Anytime the state of our database changes, we update state
-            this.setState({ todos })
+            this.setState({ policies })
         })
     }
 
-    async completeTodo(id) {
-        // Mark the todo as completed
+    async deletePolicy(id) {
+        // Mark the policy as deleted
         await firestore
-            .collection("todos")
+            .collection("policies")
             .doc(id)
             .set({
-                completed: true
+                deleted: true
             })
     }
 
-    async addTodo() {
-        if (!this.state.pendingTodo) return
+    async addPolicy() {
+        if (!this.state.pendingPolicy) return
         // Set a flag to indicate loading
-        this.setState({ addingTodo: true })
-        // Add a new todo from the value of the input
-        await firestore.collection("todos").add({
-            content: this.state.pendingTodo,
-            completed: false,
+        this.setState({ addingPolicy: true })
+        // Add a new policy from the value of the input
+        await firestore.collection("policies").add({
+            content: this.state.pendingPolicy,
+            deleted: false,
             createdAt: new Date().toISOString()
         })
         // Remove the loading flag and clear the input
-        this.setState({ addingTodo: false, pendingTodo: "" })
+        this.setState({ addingPolicy: false, pendingPolicy: "" })
     }
 
     render() {
         return (
             <Layout className="App">
                 <Header className="App-header">
-                    <h1>Quick Todo</h1>
+                    <h1>Mysurance</h1>
                 </Header>
                 <Content className="App-content">
                     <Input
-                        ref="add-todo-input"
-                        className="App-add-todo-input"
+                        ref="add-policy-input"
+                        className="App-add-policy-input"
                         size="large"
-                        placeholder="What needs to be done?"
-                        disabled={this.state.addingTodo}
-                        onChange={evt => this.setState({ pendingTodo: evt.target.value })}
-                        value={this.state.pendingTodo}
-                        onPressEnter={this.addTodo}
+                        placeholder="What needs coverage?"
+                        disabled={this.state.addingPolicy}
+                        onChange={evt => this.setState({ pendingPolicy: evt.target.value })}
+                        value={this.state.pendingPolicy}
+                        onPressEnter={this.addPolicy}
                         required
                     />
                     <Button
-                        className="App-add-todo-button"
+                        className="App-add-policy-button"
                         size="large"
                         type="primary"
-                        onClick={this.addTodo}
-                        loading={this.state.addingTodo}
+                        onClick={this.addPolicy}
+                        loading={this.state.addingPolicy}
                     >
-                        Add Todo
+                        Add Policy
                     </Button>
                     <List
-                        className="App-todos"
+                        className="App-policies"
                         size="large"
                         bordered
-                        dataSource={this.state.todos}
-                        renderItem={todo => (
+                        dataSource={this.state.policies}
+                        renderItem={policy => (
                             <List.Item>
-                                {todo.content}
+                                {policy.content}
                                 <Icon
-                                    onClick={evt => this.completeTodo(todo.id)}
-                                    className="App-todo-complete"
-                                    type="check"
+                                    onClick={evt => this.deletePolicy(policy.id)}
+                                    className="App-policy-delete"
+                                    type="delete"
                                 />
                             </List.Item>
                         )}

@@ -2,10 +2,12 @@
 
 .App {
   text-align: center;
+  background-color: #fff;
 }
 
-.App-header h1 {
-  color: whitesmoke;
+.App-header {
+  background-color: #fff;
+  box-shadow: 0 2px 8px #f0f1f2;
 }
 
 .App-content {
@@ -13,27 +15,27 @@
   padding-bottom: 100px;
 }
 
-.App-add-todo-input {
+.App-add-policy-input {
   max-width: 300px;
   margin-right: 5px;
 }
 
-.App-add-todo-button {
+.App-add-policy-button {
 }
 
-.App-todos {
+.App-policies {
   background-color: white;
-  max-width: 400px;
+  max-width: 414px;
   margin: 0 auto;
   margin-top: 20px;
   margin-bottom: 20px;
 }
 
-.App-todo {
+.App-policy {
   /* position: relative; */
 }
 
-.App-todo-complete {
+.App-policy-delete {
   font-size: 22px;
   font-weight: bold;
   cursor: pointer;
