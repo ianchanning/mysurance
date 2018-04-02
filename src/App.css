@@ -22,6 +22,10 @@
 .App-add-policy-input {
 }
 
+.ant-form-item {
+    text-align: left;
+}
+
 .App-add-policy-button {
   width: 100%;
 }
@@ -33,6 +37,15 @@
   /* position: relative; */
   text-align: left;
   margin-bottom: 16px;
+}
+
+.App-policy .ant-card-head-title {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.45);
+}
+
+.App-policy .ant-card-body small {
+    font-size: 50%;
 }
 
 .App-policy .ant-card-head {
