@@ -23,7 +23,11 @@
 }
 
 .ant-form-item {
-    text-align: left;
+  text-align: left;
+}
+
+.ant-form-explain {
+  margin-top: 4px;
 }
 
 .App-add-policy-button {
@@ -39,17 +43,43 @@
   margin-bottom: 16px;
 }
 
+.App-policy .ant-card-head-title h2,
+.App-policy .ant-card-head-title p {
+  margin-bottom: 0;
+}
+
 .App-policy .ant-card-head-title {
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.App-policy .ant-card-body h1 {
+  font-size: 36px;
 }
 
 .App-policy .ant-card-body small {
-    font-size: 50%;
+  font-size: 50%;
 }
 
 .App-policy .ant-card-head {
-    border-bottom: none;
+  border-bottom: none;
+}
+
+.App-policy .ant-collapse-item {
+  border-bottom: none;
+}
+
+.App-policy .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+    padding: 16px 0 16px 16px;
+}
+
+.App-policy .ant-collapse > .ant-collapse-item > .ant-collapse-header .arrow {
+    padding-left: 0;
+    left: 0;
+}
+
+.App-policy .ant-collapse-content {
+    padding: 8px 0;
 }
 
 .App-policy-delete {
