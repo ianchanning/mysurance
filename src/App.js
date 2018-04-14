@@ -31,7 +31,17 @@ class App extends Component {
     constructor(props) {
         super(props)
         // Set the default state of our application
-        this.state = { addingPolicy: false, policyName: "", policyValue: "", policyType: "", policyExcess: "", policies: [] }
+        this.state = {
+            addingPolicy: false,
+            policies: [],
+            types: [],
+            newPolicy: {
+                name: "",
+                value: "",
+                type: "",
+                excess: ""
+            }
+        }
         // We want event handlers to share this context
         this.addPolicy = this.addPolicy.bind(this)
         this.deletePolicy = this.deletePolicy.bind(this)
@@ -53,10 +63,11 @@ class App extends Component {
             // Anytime the state of our database changes, we update state
             this.setState({ policies })
         })
+        this.policyTypes = this.policyTypes.bind(this)
     }
 
 	componentDidMount() {
-
+        this.policyTypes()
 	}
 
     checkPrice = (rule, value, callback) => {
@@ -67,10 +78,20 @@ class App extends Component {
         callback('Price must greater than zero!');
     }
 
-	async policyTypes(url) {
-		const types = await fetch(url)
-		return types
+	policyTypes() {
+        const url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:Types_of_insurance&cmtype=subcat&format=json&origin=*"
+		fetch(url)
+            .then(response => response.json())
+            .then(json => this.setState({ types: json.query.categorymembers }))
 	}
+
+    typeTitle(type) {
+        if (!type || !type.title) {
+            return ''
+        }
+        // it appears there really is no easier way to get xxx from Category:xxx
+        return type.title.split(':').slice(-1)[0]
+    }
 
     async deletePolicy(id) {
         // Mark the policy as deleted
@@ -81,38 +102,40 @@ class App extends Component {
     }
 
     async addPolicy() {
-        if (!this.state.policyName) {
-            return
-        }
-        if (!this.state.policyType) {
-            return
-        }
-        if (!this.state.policyValue) {
-            return
-        }
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values)
             }
         })
+        if (!this.state.newPolicy.name) {
+            return
+        }
+        if (!this.state.newPolicy.type) {
+            return
+        }
+        if (!this.state.newPolicy.value) {
+            return
+        }
         // Set a flag to indicate loading
         this.setState({ addingPolicy: true })
         // Add a new policy from the value of the input
         await firestore.collection("policies").add({
-            content: this.state.policyName,
-            value: this.state.policyValue,
-            type: this.state.policyType,
-            excess: this.state.policyExcess,
+            content: this.state.newPolicy.name,
+            value: this.state.newPolicy.value,
+            type: this.state.newPolicy.type,
+            excess: this.state.newPolicy.excess,
             deleted: false,
             createdAt: new Date().toISOString()
         })
         // Remove the loading flag and clear the input
         this.setState({
 			addingPolicy: false,
-			policyName: "",
-			policyValue: "",
-			policyType: "",
-			policyExcess: ""
+            newPolicy: {
+                name: "",
+                value: "",
+                type: "",
+                excess: ""
+            }
 		})
     }
 
@@ -125,10 +148,10 @@ class App extends Component {
                 </Header>
                 <Content className="App-content">
                     <Row>
-                        <Col span={8} offset={8}>
+                        <Col xs={{span: 20, offset: 2}} md={{span: 12, offset: 6}} lg={{span: 10, offset: 7}}>
                             <Form>
                                 <FormItem label="Policy Name" colon={false}>
-                                    {getFieldDecorator("policyName", {
+                                    {getFieldDecorator("newPolicy.name", {
                                         rules: [{
 											required: true,
 											message: "We need to know what is going to be insured"
@@ -139,7 +162,9 @@ class App extends Component {
                                         size="large"
                                         placeholder="What needs coverage?"
                                         disabled={this.state.addingPolicy}
-                                        onChange={evt => this.setState({ policyName: evt.target.value })}
+                                        onChange={evt => this.setState(
+                                            { newPolicy: { ...this.state.newPolicy, name: evt.target.value } }
+                                        )}
                                         onPressEnter={this.addPolicy}
                                     />
                                     )}
@@ -155,10 +180,15 @@ class App extends Component {
 											placeholder="Please select a policy type"
 											size="large"
 											disabled={this.state.addingPolicy}
-											onChange={evt => this.setState({ policyType: evt })}
+											onChange={value => this.setState(
+                                                { newPolicy: { ...this.state.newPolicy, type: value } }
+                                            )}
 										>
-											<Option value="car">Car</Option>
-											<Option value="mobile">Mobile</Option>
+                                            {this.state.types.map(type => (
+                                                <Option key={type.title} value={this.typeTitle(type)}>{
+                                                    this.typeTitle(type)
+                                                }</Option>
+                                            ))}
 										</Select>
 									)}
 								</FormItem>
@@ -175,27 +205,33 @@ class App extends Component {
                                         size="large"
                                         placeholder="How much is it worth?"
                                         disabled={this.state.addingPolicy}
-                                        onChange={evt => this.setState({ policyValue: evt.target.value })}
+                                        onChange={evt => this.setState(
+                                            { newPolicy: { ...this.state.newPolicy, value: evt.target.value } }
+                                        )}
                                         onPressEnter={this.addPolicy}
                                         addonBefore="€"
                                     />
                                     )}
                                 </FormItem>
-                                <FormItem label="Excess">
+                                <FormItem label="Excess" colon={false}>
                                     {/* must set default of 0 to prevet controlled/uncontrolled warning */}
                                     <input
                                         type="hidden"
-                                        value={this.state.policyExcess || 0}
-                                        onChange={value => this.setState({ policyExcess: value})}
+                                        value={this.state.newPolicy.excess || 0}
+                                        onChange={value => this.setState(
+                                            { newPolicy: { ...this.state.newPolicy, excess: value } }
+                                        )}
                                     />
                                     <Slider
-                                        marks={marksMap(Number.parseInt(this.state.policyValue, 10), {}, 10)}
-                                        max={excessStepSize(this.state.policyValue || 0) * 10}
+                                        marks={marksMap(Number.parseInt(this.state.newPolicy.value, 10), {}, 10)}
+                                        max={excessStepSize(this.state.newPolicy.value || 0) * 10}
                                         step={null}
-                                        disabled={!this.state.policyValue}
-                                        defaultValue={this.state.policyExcess || 0}
-                                        onChange={value => this.setState({ policyExcess: value})}
-                                        tipFormatter={!this.state.policyValue ? x => 'Please set the policy value' : null}
+                                        disabled={!this.state.newPolicy.value}
+                                        defaultValue={this.state.newPolicy.excess || 0}
+                                        onChange={value => this.setState(
+                                            { newPolicy: { ...this.state.newPolicy, excess: value } }
+                                        )}
+                                        tipFormatter={!this.state.newPolicy.value ? x => 'Please set the policy value' : null}
                                     />
                                 </FormItem>
                                 <FormItem>
@@ -215,7 +251,7 @@ class App extends Component {
                                     <Card
                                         className="App-policy"
                                         key={policy.createdAt}
-                                        title={<div><h2>{policy.content}</h2><p>{policy.type || 'Unknown'} insurance</p></div>}
+                                        title={<div><h2>{policy.content}</h2><p>{policy.type || 'Unknown'}</p></div>}
                                         extra={
                                             <Icon
                                                 onClick={evt => this.deletePolicy(policy.id)}
@@ -228,9 +264,9 @@ class App extends Component {
                                         <Meta
                                             description={
                                                 <Collapse bordered={false}>
-                                                    <Panel header=" ">
+                                                    <Panel header="Details">
                                                         <p>Excess: {policy.excess || 0} €</p>
-                                                        {/*<p>{policy.createdAt}</p>*/}
+                                                        <p>Created on: {new Date(policy.createdAt).toLocaleString()}</p>
                                                     </Panel>
                                                 </Collapse>
                                             }
